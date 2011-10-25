@@ -1,5 +1,6 @@
 package cucumber.runtime;
 
+import cucumber.runtime.converters.ConverterDescription;
 import cucumber.runtime.converters.LocalizedXStreams;
 import cucumber.table.CamelCaseHeaderMapper;
 import cucumber.table.TableHeaderMapper;
@@ -121,6 +122,10 @@ public class World {
 
     public void addStepDefinition(StepDefinition stepDefinition) {
         stepDefinitions.add(stepDefinition);
+    }
+    
+    public void addFieldConverter(ConverterDescription converterDefinition) {
+        localizedXStreams.addCustomConverter(converterDefinition);
     }
 
     public void addBeforeHook(HookDefinition hookDefinition) {

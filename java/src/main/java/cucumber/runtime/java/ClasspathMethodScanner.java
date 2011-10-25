@@ -2,14 +2,18 @@ package cucumber.runtime.java;
 
 import cucumber.annotation.After;
 import cucumber.annotation.Before;
+import cucumber.annotation.DateTimeFormat;
 import cucumber.annotation.Order;
 import cucumber.resources.Resources;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
@@ -54,12 +58,34 @@ public class ClasspathMethodScanner {
                         if (regexpString != null) {
                             Pattern pattern = Pattern.compile(regexpString);
                             javaBackend.addStepDefinition(pattern, method);
+                            scanParameters(method.getGenericParameterTypes(), javaBackend);
                         }
                     } catch (NoSuchMethodException ignore) {
                     } catch (IllegalAccessException ignore) {
                     } catch (InvocationTargetException ignore) {
                     }
                 }
+            }
+        }
+    }
+
+    private void scanParameters(Type[] types, JavaBackend javaBackend) {
+        for (Type type : types) {            
+            if (type instanceof ParameterizedType) {
+               Type[] parameterizedType = ((ParameterizedType) type).getActualTypeArguments();
+                if (parameterizedType.length == 1
+                        && parameterizedType[0] instanceof Class) {
+                    Class<?> clazz = (Class<?>) parameterizedType[0];
+                    for (Field field : clazz.getFields()) {
+                        DateTimeFormat formatter = field
+                                .getAnnotation(DateTimeFormat.class);
+                        if (formatter != null) {
+                            javaBackend.registerFieldConverter(clazz, field,
+                                    formatter.value());
+                        }
+
+                    }
+                }              
             }
         }
     }

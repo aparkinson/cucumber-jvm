@@ -3,6 +3,8 @@ package cucumber.table;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.converters.javabean.JavaBeanConverter;
+
+import cucumber.runtime.converters.ConverterDescription;
 import cucumber.runtime.converters.LocalizedXStreams;
 import org.junit.Test;
 
@@ -40,6 +42,16 @@ public class TableConverterTest {
         List<Map<String, String>> users = tc.convert(mapType, headerRow(), bodyRows());
         assertEquals("10/05/1957", users.get(0).get("birthDate"));
     }
+    
+    @Test
+    public void custom_type_conversion_overides_default_in_pojos() {
+        LocalizedXStreams xStreams = new LocalizedXStreams();
+        xStreams.addCustomConverter(new ConverterDescription(UserPojo.class, Date.class, "birthDate", "yyyy/MM/dd"));
+        XStream en = xStreams.get(Locale.UK);
+        TableConverter tc = new TableConverter(en);
+        List<UserPojo> users = tc.convert(UserPojo.class, headerRow(), alternateFormattedBodyRows());
+        assertEquals(sidsBirthday(), users.get(0).birthDate);
+    }
 
     private List<String> headerRow() {
         return asList("name", "birthDate", "credits");
@@ -49,6 +61,13 @@ public class TableConverterTest {
         return asList(
                 asList("Sid Vicious", "10/05/1957", "1000"),
                 asList("Frank Zappa", "21/12/1940", "3000")
+        );
+    }
+    
+    private List<List<String>> alternateFormattedBodyRows() {
+        return asList(
+                asList("Sid Vicious", "1957/05/10", "1000"),
+                asList("Frank Zappa", "1940/12/21", "3000")
         );
     }
 

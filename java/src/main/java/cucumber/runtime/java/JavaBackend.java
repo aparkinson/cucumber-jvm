@@ -2,14 +2,17 @@ package cucumber.runtime.java;
 
 import cucumber.annotation.After;
 import cucumber.annotation.Before;
+import cucumber.annotation.DateTimeFormat;
 import cucumber.annotation.Order;
 import cucumber.resources.Resources;
 import cucumber.runtime.Backend;
 import cucumber.runtime.World;
+import cucumber.runtime.converters.ConverterDescription;
 import gherkin.formatter.model.Step;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
@@ -85,5 +88,9 @@ public class JavaBackend implements Backend {
                 registerClassInObjectFactory(paramClazz);
             }
         }
+    }
+    
+    public void registerFieldConverter(Class<?> beanClass, Field field, String pattern) {
+        world.addFieldConverter(new ConverterDescription(beanClass, field.getType(), field.getName(), pattern));       
     }
 }
