@@ -73,7 +73,6 @@ public class ProgressFormatter implements Formatter, Reporter {
     @Override
     public void close() {
         out.println();
-        out.close();
     }
 
     @Override
